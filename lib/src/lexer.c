@@ -143,8 +143,21 @@ static void ts_lexer_goto(Lexer *self, Length position) {
   self->current_position = position;
 
   // Move to the first valid position at or after the given position.
+  // The included ranges are sorted and disjoint, so their end bytes are
+  // non-decreasing. Binary search for the first range that ends after the
+  // position, then skip forward past any empty ranges.
   bool found_included_range = false;
-  for (unsigned i = 0; i < self->included_range_count; i++) {
+  unsigned start_index = 0;
+  unsigned end_index = self->included_range_count;
+  while (start_index < end_index) {
+    unsigned mid_index = start_index + (end_index - start_index) / 2;
+    if (self->included_ranges[mid_index].end_byte > self->current_position.bytes) {
+      end_index = mid_index;
+    } else {
+      start_index = mid_index + 1;
+    }
+  }
+  for (unsigned i = start_index; i < self->included_range_count; i++) {
     TSRange *included_range = &self->included_ranges[i];
     if (
       included_range->end_byte > self->current_position.bytes &&
