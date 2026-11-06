@@ -19,9 +19,8 @@ let package = Package(
                         "src/unicode/README.md",
                         "src/unicode/LICENSE",
                         "src/wasm/stdlib-symbols.txt",
-                        "src/lib.c",
                 ],
-                sources: ["src"],
+                sources: ["src/lib.c", "src/wasm/stdlib.c"],
                 publicHeadersPath: "include",
                 cSettings: [
                         .headerSearchPath("src"),

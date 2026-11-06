@@ -73,3 +73,30 @@ highlighting cutoff, the historical Debug assertion's cause, or signed/native
 acceptance. Application adoption still requires current immutable transitive
 pins, provenance and complete exact-head app/package/Debug/Release checks.
 No upstream submission or source-offer/public release is claimed.
+
+## Combined runtime compilation in SwiftPM
+
+The Swift package now compiles the existing src/lib.c combined entry point plus
+the separate conditional src/wasm/stdlib.c. This replaces the historical
+sources:["src"] list and removes lib.c from exclusions. The twelve C files
+included by lib.c plus stdlib.c are exactly the same thirteen implementation
+inputs as before. Original C11, feature/platform defines, headers, source bytes
+and licence texts remain unchanged. The standalone controls remain outside the
+product source list. No parser, grammar, query or runtime algorithm changes in
+this build-only step, and the rejected capture-sorting experiment is excluded.
+
+A normal Foundation console using the exact actual wrapper and Markdown
+grammar/query sources compares the original and combined package builds. All
+23,256 ordered highlight results, named/global metadata, current-source ranges,
+aliases and independent concurrent cursor controls agree. All260 defined external
+C symbol names agree, and recorded actual compiler/linker inputs retain the same
+C defines/standard/optimization flags. Two paired five-measurement comparisons
+show approximately9.5% and11% lower local total medians. These component timings
+do not establish a whole-app budget or native acceptance.
+
+The earlier complete262-case Rust/corpus and C sanitizer/ownership/trace evidence
+applies to the unchanged C sources and already uses the combined entry point;
+it does not independently qualify this Swift package-build change. Application
+adoption still requires fresh exact locked resolution, full package/app tests
+and the unchanged Debug/Release native/integration/performance gates. No source
+offer, upstream submission, signing or public release is performed.
