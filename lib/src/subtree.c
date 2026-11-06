@@ -614,6 +614,8 @@ int ts_subtree_compare(Subtree left, Subtree right, SubtreePool *pool) {
     for (uint32_t i = ts_subtree_child_count(left); i > 0; i--) {
       Subtree left_child = ts_subtree_children(left)[i - 1];
       Subtree right_child = ts_subtree_children(right)[i - 1];
+      // An identical immutable heap subtree has identical descendants.
+      if (!left_child.data.is_inline && !right_child.data.is_inline && left_child.ptr == right_child.ptr) continue;
       array_push(&pool->tree_stack, ts_subtree_to_mut_unsafe(left_child));
       array_push(&pool->tree_stack, ts_subtree_to_mut_unsafe(right_child));
     }

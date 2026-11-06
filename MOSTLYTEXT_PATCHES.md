@@ -1,4 +1,4 @@
-# MostlyText range-lookup patch
+# MostlyText runtime patches
 
 Exact base: tree-sitter0.25.10 da6fe9beb4f7f67beb75914ca8e0d48ae48d6406.
 Original MIT licence, public headers and ABI remain unchanged. This owner-
@@ -8,7 +8,7 @@ The lexer previously scanned included ranges from index0 on each seek. Valid
 ranges have nondecreasing end bytes. Lower-bound binary search finds the first
 end after the original seek byte; the existing forward skip then preserves
 empty-range, position, chunk, point and EOF behavior. No allocation or new public
-interface is introduced. Only lib/src/lexer.c changes in the runtime product.
+interface is introduced. That range-lookup patch changes only lib/src/lexer.c in the runtime product.
 
 lib/tests/lexer_seek_equivalence.c includes the actual runtime plus the original
 linear implementation as an independent reference. It verifies1,624,448 cases
@@ -38,3 +38,38 @@ Synthetic many-range performance improves, but full editor latency, native
 acceptance, exact release artifacts and the existing large-document fallback
 remain separate application gates. Application adoption requires immutable
 transitive pins, original licence/inventory checks and complete exact-head CI.
+
+## Shared immutable subtree comparison
+
+The comparison loop now avoids pushing a pair of identical heap child trees.
+Both children must be non-inline and have the same pointer. Identical immutable
+subtrees have identical descendants; distinct trees retain the original reverse
+traversal, symbol/child-count ordering and equality behavior. Reference counts,
+public headers, API/ABI, parser/scanner/edit state and original MIT text do not
+change. Only lib/src/subtree.c changes in this additional runtime patch.
+
+lib/tests/subtree_compare_identity.c includes the actual runtime and real JSON
+parse trees. It checks324 ordered pairs, antisymmetry/transitivity, distinct
+structurally equal trees, unequal descendants, shared copies and retained root
+reference counts. Original and patched outputs are identical; AddressSanitizer
+and UndefinedBehaviorSanitizer also produce that exact output without errors.
+A disposable counter-only source copy establishes the work regression: the
+original shared-document comparison visits36,866 pairs and fails the explicit
+four-pair bound; the patched runtime visits2 and passes. No counters ship.
+
+The actual current application inlineDense fixture and its root-derived inline
+injection ranges reproduce150,921,270 comparison visits at262,151 bytes. The
+patch reduces that to5,454 with identical complete tree/range/point/query hashes
+for original, incremental and fresh parses. The documented262-test Rust/corpus
+suite passes before and after. All6,000 valid-scalar behavior traces across
+UTF-8/UTF-16LE/UTF-16BE remain byte-identical, including the same282 existing
+raw incremental/fresh discrepancies and nonzero exit2. Sanitized traces match.
+A simpler prose fixture makes zero comparisons in either version and establishes
+no benefit for that input; it is retained rather than substituted for the
+representative inline workload.
+
+This is a component optimization, not proof of50ms editor latency, a larger
+highlighting cutoff, the historical Debug assertion's cause, or signed/native
+acceptance. Application adoption still requires current immutable transitive
+pins, provenance and complete exact-head app/package/Debug/Release checks.
+No upstream submission or source-offer/public release is claimed.
