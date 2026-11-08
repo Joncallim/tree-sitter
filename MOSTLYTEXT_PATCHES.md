@@ -146,3 +146,23 @@ together, resolve the actual lock through the authorized hosted runner, then
 qualify package, app, native editing and original regression paths on one exact
 candidate. These C results do not close the original Debug abort, 50 ms budget,
 attribution or release gates.
+
+The fork's `lib/tests/utf16_decoder_boundaries.c` is the unchanged twelve-case
+driver from the retained original/bounds/composite comparison. It runs directly
+against this fork's `unicode.h`:
+
+    clang -std=c11 -D_DEFAULT_SOURCE -O2 -Wall -Wextra -Werror \
+      -Ilib/src -Ilib/include lib/tests/utf16_decoder_boundaries.c \
+      -o /tmp/utf16-decoder-boundaries
+    /tmp/utf16-decoder-boundaries
+
+The actual fork source passes all twelve normal and instrumented cases; the
+two true two-byte heap probes pass with AddressSanitizer and
+UndefinedBehaviorSanitizer. The same fork source yields the earlier exact
+eight-case Markdown-inline output and all 324 ordered subtree results, without
+sanitizer findings. The 268 defined external C symbols agree with the original
+runtime. The proof retains actual commands, binary hashes, linkage and full
+stdout/stderr under
+`/Volumes/Fast SSD/CORTANA-Builds/parser-fork-source-20261108/local-first`.
+Those local component results do not replace exact hosted source/lock/native
+qualification.
