@@ -100,3 +100,49 @@ it does not independently qualify this Swift package-build change. Application
 adoption still requires fresh exact locked resolution, full package/app tests
 and the unchanged Debug/Release native/integration/performance gates. No source
 offer, upstream submission, signing or public release is performed.
+
+## Included-range reuse and UTF-16 decoder correctness
+
+This is a narrow source update over the exact combined-runtime revision
+`3b1fb00f8c4f8907073f9b7342a807a0231867fa`. The proposed product delta
+is limited to `lib/src/parser.c` and `lib/src/unicode.h`; the original MIT
+licence, public C headers, Swift manifest, thirteen compiled C inputs and
+existing allocation/ownership policy remain unchanged.
+
+An included-range change can cross bytes a cached token examined just beyond
+its own span. The reviewed upstream
+[lookahead fix](https://github.com/tree-sitter/tree-sitter/pull/5641) extends the
+existing reuse comparison through that lookahead for non-EOF tokens. The
+existing EOF handling is retained. In the exact pinned Markdown-inline grammar,
+eight fixed UTF-8 and UTF-16LE range-change cases had sixteen incremental/fresh
+tree mismatches before this guard and none after it. The application currently
+parses Markdown inline afresh, so this is a C component correctness result,
+not proof of an editor-visible Markdown bug or improved typing latency.
+
+The same pinned runtime passes UTF-16 decoder byte lengths to macros that count
+16-bit units. The reviewed upstream
+[bounds fix](https://github.com/tree-sitter/tree-sitter/pull/5549) rejects chunks
+shorter than one unit and converts the supplied byte length to units. Both
+original decoders read past a true two-byte allocation when the advertised
+chunk ends with a lead surrogate; AddressSanitizer reports a two-byte
+heap-buffer-overflow. A separate reviewed upstream
+[byte-order fix](https://github.com/tree-sitter/tree-sitter/pull/5912) converts
+the trailing surrogate in its declared endian order before testing and
+combining it. The original twelve-case decoder matrix has six failed cases;
+the bounds-only source has one remaining valid big-endian pair failure; the
+two exact upstream corrections together pass all twelve. The original,
+bounds-only and combined first results remain separately retained.
+
+Before publication, require the same unchanged C fixtures against the exact
+committed source, the eight-case included-range corpus, all 324 ordered
+subtree comparison/ownership checks, strict compile and AddressSanitizer plus
+UndefinedBehaviorSanitizer. Compare all product source bytes, exported symbols
+and licence to the pinned parent. The standalone C tests live in `lib/tests`,
+outside the Swift package product source list. They receive fixed generated
+input only. No application, document, GUI or JavaScript execution is involved.
+
+Application adoption must update the dependency graph and compliance inventory
+together, resolve the actual lock through the authorized hosted runner, then
+qualify package, app, native editing and original regression paths on one exact
+candidate. These C results do not close the original Debug abort, 50 ms budget,
+attribution or release gates.
